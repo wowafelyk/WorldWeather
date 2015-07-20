@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">WorldWeather</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="settings">Налаштування</string>
+    <string name="action_search">Пошук</string>
+
+</resources>
