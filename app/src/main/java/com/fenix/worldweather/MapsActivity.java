@@ -1,22 +1,66 @@
 package com.fenix.worldweather;
 
+import android.app.Activity;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.app.ActionBar;
+import android.support.v4.app.FragmentManager;
 import android.view.Menu;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.lang.ref.WeakReference;
 
 public class MapsActivity extends FragmentActivity {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    private WeatherData data=null;
+    private WeakReference<Activity> weakActivity = new WeakReference<Activity>(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().
+                findFragmentById(R.id.map);
+        if (savedInstanceState == null) {
+            mapFragment.setRetainInstance(true);
+        }else{
+            mMap = mapFragment.getMap();
+        }
+
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setCustomView(R.layout.actionbar);
+
+        final EditText searchfield = (EditText) actionBar.getCustomView().findViewById(R.id.searchfield);
+        ImageButton search = (ImageButton) actionBar.getCustomView().findViewById(R.id.search_button);
+        final Context context = this;
+        search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                WeatherTask task =  new WeatherTask(weakActivity.get(),data);
+                task.execute(searchfield.getText().toString());
+
+                //Toast.makeText(getBaseContext(), searchfield.getText().toString(), Toast.LENGTH_LONG).show();
+            }
+        });
+
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME);
         setUpMapIfNeeded();
     }
 
@@ -61,13 +105,32 @@ public class MapsActivity extends FragmentActivity {
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+        //mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.menu_weather,menu);
-        return true;
+        menu.findItem(R.id.action_search).getActionView();
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    public void showWeather(WeatherData data){
+
+        LatLng latLng = new LatLng(data.coord.getLat(),data.coord.getLon());
+        Bitmap origin = data.getImage();
+        Bitmap output = Bitmap.createScaledBitmap(data.getImage(),100,100,false);
+
+
+
+       // GroundOverlayOptions newarkMap = new GroundOverlayOptions().image(BitmapDescriptorFactory.
+         //       fromBitmap(b)).position(latLng,50000f,50000f);
+        //mMap.addGroundOverlay(newarkMap);
+
+        mMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.
+                fromBitmap(output)).title(data.weather.getDescription()).
+                snippet("t = "+data.main.getTemp_min()+" - "+data.main.getTemp_max())).showInfoWindow();
+
     }
 
 
