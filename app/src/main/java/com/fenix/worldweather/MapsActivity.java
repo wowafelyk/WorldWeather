@@ -1,6 +1,9 @@
 package com.fenix.worldweather;
 
 import android.app.Activity;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,26 +12,36 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.app.ActionBar;
 import android.support.v4.app.FragmentManager;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.w3c.dom.Text;
 
 import java.lang.ref.WeakReference;
 
 public class MapsActivity extends FragmentActivity {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-    private WeatherData data=null;
+    private static WeatherData data=null;
     private WeakReference<Activity> weakActivity = new WeakReference<Activity>(this);
+    private Marker marker = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,15 +66,21 @@ public class MapsActivity extends FragmentActivity {
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 WeatherTask task =  new WeatherTask(weakActivity.get(),data);
                 task.execute(searchfield.getText().toString());
-
-                //Toast.makeText(getBaseContext(), searchfield.getText().toString(), Toast.LENGTH_LONG).show();
             }
         });
-
         actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME);
         setUpMapIfNeeded();
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                 DialogFragment newFragment = new Weather_Fragment();
+                newFragment.show(getFragmentManager(),"dialog");
+                return false;
+            }
+        });
     }
 
     @Override
@@ -115,23 +134,66 @@ public class MapsActivity extends FragmentActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    public void showWeather(WeatherData data){
+    public void showWeather(WeatherData weatherData){
 
-        LatLng latLng = new LatLng(data.coord.getLat(),data.coord.getLon());
-        Bitmap origin = data.getImage();
-        Bitmap output = Bitmap.createScaledBitmap(data.getImage(),100,100,false);
+        LatLng latLng = new LatLng(weatherData.coord.getLat(),weatherData.coord.getLon());
+        Bitmap output = Bitmap.createScaledBitmap(weatherData.getImage(),100,100,false);
+        mMap.clear();
 
+        marker = mMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.
+                fromBitmap(output)).title(weatherData.weather.getDescription()).
+                snippet("t = "+weatherData.main.getTemp_min()+" - "+weatherData.main.getTemp_max()));
+        marker.showInfoWindow();
+        data = weatherData;
 
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(latLng).zoom(7).build();
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
+        mMap.animateCamera(cameraUpdate);
 
-       // GroundOverlayOptions newarkMap = new GroundOverlayOptions().image(BitmapDescriptorFactory.
-         //       fromBitmap(b)).position(latLng,50000f,50000f);
-        //mMap.addGroundOverlay(newarkMap);
-
-        mMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.
-                fromBitmap(output)).title(data.weather.getDescription()).
-                snippet("t = "+data.main.getTemp_min()+" - "+data.main.getTemp_max())).showInfoWindow();
 
     }
+
+
+    public static class Weather_Fragment extends DialogFragment {
+
+        public void onCreate(Bundle savedInstanceSate){
+            super.onCreate(savedInstanceSate);
+
+        }
+
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle saveInstanceState){
+            View v = inflater.inflate(R.layout.fragment,container,false);
+            TextView textCity = (TextView)v.findViewById(R.id.city);
+            TextView textLon = (TextView)v.findViewById(R.id.lon);
+            TextView textLat = (TextView)v.findViewById(R.id.lat);
+            TextView textWeather = (TextView)v.findViewById(R.id.weather);
+            TextView textMain = (TextView)v.findViewById(R.id.main);
+            TextView textMain1 = (TextView)v.findViewById(R.id.main1);
+            TextView textMain2 = (TextView)v.findViewById(R.id.main2);
+            TextView textWind = (TextView)v.findViewById(R.id.wind);
+            TextView textSys = (TextView)v.findViewById(R.id.sys);
+            TextView textSys1 = (TextView)v.findViewById(R.id.sys1);
+            getDialog().setTitle("Weather in city");
+
+            textCity.setText("Sity - "+data.getCityName());
+            textLon.setText("Longitude - " + data.coord.getLon());
+            textLat.setText("Latitude - " + data.coord.getLat());
+            textWeather.setText("Weather - "+data.weather.getMain()+"  "+data.weather.getDescription());
+            textMain.setText("Temperature - "+data.main.getTemp());
+            textMain2.setText("   Tmin-"+data.main.getTemp_min()+"  Tmax.-"+data.main.getTemp_max());
+            textMain1.setText("Pressure - "+data.main.getPressure());
+            textWind.setText("Wind speed - "+data.wind.getSpeed());
+            textSys.setText("Sunrise - "+data.sys.getSunrise());
+            textSys1.setText("Sunset - "+data.sys.getSunset());
+
+            return v;
+        }
+
+    }
+
+
+
 
 
 }

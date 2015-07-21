@@ -16,6 +16,6 @@ https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend
     keytool -exportcert -alias worldWeather -keystore path-to-debug-or-production-keystore -list -v -storepass myKeysAndroid -keypass worldWeather
     -->
     <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
-        AIzaSyBwxwilOYUSQwHe9e3xeZ7oHSPOZ0c8Tbw
+        AIzaSyDGWMhnNTc6M7M52Cit37TqEHV0deEe46k
     </string>
 </resources>

@@ -2,11 +2,17 @@ apply plugin: 'com.android.application'
 
 android {
     signingConfigs {
-        config {
-            keyAlias 'worldWeather'
-            keyPassword 'worldweather'
-            storeFile file('C:/Users/fenix/.android/myKeysAndroid.jks')
-            storePassword 'myKeysAndroid'
+        release {
+            keyPassword 'weather'
+            keyAlias 'weather'
+            storeFile file('C:/Users/fenix/.android/keystore.jks')
+            storePassword 'keystore'
+        }
+        debug {
+            keyAlias 'weather'
+            keyPassword 'weather'
+            storeFile file('C:/Users/fenix/.android/keystore.jks')
+            storePassword 'keystore'
         }
     }
     compileSdkVersion 22
@@ -22,6 +28,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            signingConfig signingConfigs.debug
         }
     }
 }

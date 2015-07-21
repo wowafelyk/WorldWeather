@@ -46,7 +46,7 @@ public class WeatherTask extends AsyncTask<String,Void,WeatherData> {
                 @Override
                 public void run() {
                     Toast.makeText(activityWeakReference.get().getBaseContext(),
-                            "По вашому запиту нічого не знайдено", Toast.LENGTH_LONG).show();
+                            " РџРѕ РІР°С€РѕРјСѓ Р·Р°РїРёС‚Сѓ РЅС–С‡РѕРіРѕ РЅРµ Р·РЅР°Р№РґРµРЅРѕ", Toast.LENGTH_LONG).show();
 
                 }
             });
@@ -59,15 +59,15 @@ public class WeatherTask extends AsyncTask<String,Void,WeatherData> {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        weatherData=locWeatherData;
 
         return locWeatherData;
     }
 
     @Override
     protected  void onPostExecute(WeatherData data){
-       if(data.coord.getLon()!=null) {
-           weatherData = data;
-           ((MapsActivity) activityWeakReference.get()).showWeather(data);
+        if(data.coord.getLon()!=null) {
+            ((MapsActivity) activityWeakReference.get()).showWeather(data);
        }
     }
 
@@ -85,24 +85,19 @@ public class WeatherTask extends AsyncTask<String,Void,WeatherData> {
 
             BufferedReader reader = null;
             URLConnection conn = null;
-            //Recipe[] recipeArray = new Recipe[30];
+
 
             // Send data
             try {
 
                 // Defined URL  where to send data
-                URL url = new URL(BASE_URL+"?q="+params+"&type=accurate&units=metric&lang=ua&mode=json"+"&APPID="+APP_KEY);
+                URL url = new URL(BASE_URL+"?q="+params+"&type=accurate&units=metric&lang=us&mode=json"+"&APPID="+APP_KEY);
                 // Send POST data request
                 conn = url.openConnection();
                 conn.setDoOutput(true);
-                //conn.setDoInput(true);
-                //OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-                //wr.write();
-                //Log.d(TEST, "Serch params = " + params[1]);
-                //wr.flush();
+
 
                 // Get the server response
-
                 reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 StringBuilder sb = new StringBuilder();
                 String line = null;

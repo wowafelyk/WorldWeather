@@ -1,6 +1,8 @@
 package com.fenix.worldweather;
 
 import android.graphics.Bitmap;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Saves weather data
@@ -175,8 +177,8 @@ public class WeatherData {
         private Integer id;
         private String message;
         private String county;
-        private Long sunrise;
-        private Long sunset;
+        private String sunrise;
+        private String sunset;
 
         public String getType() {
             return type;
@@ -210,20 +212,26 @@ public class WeatherData {
             this.county = county;
         }
 
-        public Long getSunrise() {
+        public String getSunrise() {
             return sunrise;
         }
 
         public void setSunrise(Long sunrise) {
-            this.sunrise = sunrise;
+
+            SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm aa");
+            Date dt = new Date(sunrise*1000);
+            this.sunrise = timeFormat.format(dt);
         }
 
-        public Long getSunset() {
+        public String getSunset() {
             return sunset;
         }
 
         public void setSunset(Long sunset) {
-            this.sunset = sunset;
+
+            SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm aa");
+            Date dt = new Date(sunset*1000);
+            this.sunset = timeFormat.format(dt);
         }
     }
 
@@ -338,5 +346,7 @@ public class WeatherData {
     public void setSys(Sys sys) {
         this.sys = sys;
     }
+
+
 
 }
